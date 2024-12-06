@@ -1,0 +1,76 @@
+#include <SFML/Graphics.hpp>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+
+// Function to generate a random color
+sf::Color getRandomColor() {
+    return sf::Color(rand() % 256, rand() % 256, rand() % 256);
+}
+
+// Function to generate a star shape
+sf::CircleShape createStar(float radius, const sf::Vector2f& position, const sf::Color& color) {
+    sf::CircleShape star(radius, 5); // A 5-sided shape resembles a star
+    star.setFillColor(color);
+    star.setOrigin(radius, radius);
+    star.setPosition(position);
+    star.setOutlineThickness(2);
+    star.setOutlineColor(sf::Color::White);
+    return star;
+}
+
+int main() {
+    // Initialize random seed
+    srand(static_cast<unsigned>(time(nullptr)));
+
+    // Create the main window
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Shining Stars");
+    window.setFramerateLimit(60);
+
+    // Create a vector to hold stars
+    std::vector<sf::CircleShape> stars;
+
+    // Create initial stars
+    for (int i = 0; i < 50; ++i) {
+        sf::Vector2f randomPosition(rand() % 800, rand() % 600);
+        sf::Color randomColor = getRandomColor();
+        stars.push_back(createStar(5 + rand() % 5, randomPosition, randomColor));
+    }
+
+    while (window.isOpen()) {
+        // Handle events
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                window.close();
+        }
+
+        // Get the current mouse position
+        sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+
+        // Update stars to follow the cursor
+        for (size_t i = 0; i < stars.size(); ++i) {
+            float offsetX = static_cast<float>(rand() % 21 - 10); // Random jitter effect
+            float offsetY = static_cast<float>(rand() % 21 - 10);
+            stars[i].setPosition(mousePosition.x + offsetX, mousePosition.y + offsetY);
+
+            // Change star color periodically
+            if (rand() % 30 == 0) {
+                stars[i].setFillColor(getRandomColor());
+            }
+        }
+
+        // Clear the window
+        window.clear();
+
+        // Draw all the stars
+        for (const auto& star : stars) {
+            window.draw(star);
+        }
+
+        // Update the window
+        window.display();
+    }
+
+    return 0;
+}
